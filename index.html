@@ -63,16 +63,14 @@
       id="text-input"
       placeholder="Enter the question..."
     /><br /><br />
-    <div class="row">
-      <button
-        id="submit-btn"
-        type="submit"
-        style="background-color: #0468aa"
-        class="type-button"
-      >
-        Submit
-      </button>
-    </div>
+    <button
+      id="submit-btn"
+      type="submit"
+      style="background-color: #0468aa"
+      class="type-button"
+    >
+      Submit
+    </button>
     <div id="answer-box"></div>
 
     <script>
@@ -91,34 +89,12 @@
         "whom",
       ];
       var editor =
-        /*"sorts\n" +
-        "    #people = {tommy, alex, john, daniel, sarah, peter, lino}.\n" +
-        "    #gender = {male, female}.\n" +
-        "predicates\n" +
-        "    advisor(#people, #people).\n" +
-        "    friend(#people, #people).\n" +
-        "    gender(#people,#gender).\n" +
-        "    spanish(#people).\n" +
-        "rules\n" +
-        "    advisor(tommy, alex).\n" +
-        "    advisor(tommy, john).\n" +
-        "    advisor(tommy, daniel).\n" +
-        "    advisor(tommy, lino).\n" +
-        "    friend(lino, alex).\n" +
-        "    friend(lino, peter).\n" +
-        "    friend(sarah, alex).\n" +
-        "    friend(X, Y):-friend(Y,X).\n" +
-        "    gender(tommy,male).\n" +
-        "    gender(lino,male).\n" +
-        "    gender(sarah, female).\n" +
-        "    spanish(lino).";*/
         "sorts\n" +
         "    #doctor = {tommy, alex, john, daniel, sarah, peter, lino}.\n" +
-        "    #gender = {male, female}.\n" +
-        "    #specialization = {cardiology,dermatology}.\n" +
-        "    #room = {202H, 102A}.\n" +
+        "    #specialization = {cardiology, dermatology}.\n" +
+        "    #room = {202, 102}.\n" +
         "    #patient = {kim, tim}.\n" +
-        "    #disease = {cardiology, dermatology}.\n" +
+        "    #disease = {cardio, dermato}.\n" +
         "predicates\n" +
         "    department(#doctor, #specialization).\n" +
         "    appointment(#doctor, #room).\n" +
@@ -129,13 +105,13 @@
         "    department(tommy, dermatology).\n" +
         "    department(alex, cardiology).\n" +
         "    department(alex, dermatology).\n" +
-        "    appointment(lino, 202H).\n" +
-        "    appointment(lino, 102A).\n" +
-        "    appointment(sarah, 202H).\n" +
-        "    meetAt(kim,202H).\n" +
-        "    meetAt(tim,202H).\n" +
-        "    meetAt(tim, 102A).\n" +
-        "    hasADisease(tim, cardiology).";
+        "    appointment(lino, 202).\n" +
+        "    appointment(lino, 102).\n" +
+        "    appointment(sarah, 202).\n" +
+        "    meetAt(kim, 202).\n" +
+        "    meetAt(tim, 202).\n" +
+        "    meetAt(tim, 102).\n" +
+        "    hasADisease(tim, cardio).";
       // sorts
       var contstring = editor.split("sorts\n")[1].split("predicates\n");
       var sortstring = contstring[0].split(".");
@@ -278,6 +254,7 @@
               editor: editor,
             },
             success: function (response) {
+              console.log(editor);
               console.log(response);
               const answer = response || "Sorry, I could not find an answer.";
               answerDiv.innerHTML = answer;

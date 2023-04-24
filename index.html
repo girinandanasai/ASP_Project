@@ -53,9 +53,11 @@
     <h1 align="center" style="background-color: GRAY; color: #0468aa">
       HEALTH CARE MANAGEMENT
     </h1>
-    <h1 style="text-align: center; color: purple">
-      Ask a Question based on the Knowledge
-    </h1>
+    <h1 id="msg" style="text-align: center; color: purple"></h1>
+    <h3 style="text-align: center; color: purple">
+      Ask Question using voice or text. It can answer the questions such as
+      “Does marco has a Disease cold?”, “Who has a disease fever?”
+    </h3>
     <div id="answer"></div>
     <button id="voice-input-btn"><i class="fa fa-microphone"></i></button>
     <input
@@ -92,26 +94,54 @@
         "sorts\n" +
         "    #doctor = {tommy, alex, john, daniel, sarah, peter, lino}.\n" +
         "    #specialization = {cardiology, dermatology}.\n" +
-        "    #room = {202, 102}.\n" +
-        "    #patient = {kim, tim}.\n" +
-        "    #disease = {cardio, dermato}.\n" +
+        "    #room = {101, 102, 103, 104, 105, 106, 107, 108}.\n" +
+        "    #juniorDoctor = {lucas, sam, ben, isla}.\n" +
+        "    #patient = {marco, zavier, george, chloe}.\n" +
+        "    #disease = {heart attack, fever, cold, cancer, thyroid, pcos, allergies, malaria, chickenpox, diarrheal}.\n" +
+        "    #conditionType = {mild, moderate, critical}.\n" +
+        "    #hospital = {apollo, capital}.\n" +
+        "    #patientCoordinator = {hailey, mckaiah}.\n" +
         "predicates\n" +
         "    department(#doctor, #specialization).\n" +
         "    appointment(#doctor, #room).\n" +
         "    meetAt(#patient, #room).\n" +
         "    hasADisease(#patient, #disease).\n" +
+        "    appointedTo(#patient, #doctor).\n" +
+        "    allocatedTo(#patient, #juniorDoctor).\n" +
+        "    allocatedto(#juniorDoctor, #doctor).\n" +
+        "    diagnose(#disease, #doctor).\n" +
+        "    schedule(#doctor, #patient).\n" +
+        "    conditioned(#patient, #conditionType).\n" +
+        "    hasA(#hospital, #doctor).\n" +
+        "    availability(#doctor, #patientCoordinator).\n" +
+        "    appointed(#patientCoordinator, #patient).\n" +
         "rules\n" +
         "    department(tommy, cardiology).\n" +
         "    department(tommy, dermatology).\n" +
         "    department(alex, cardiology).\n" +
         "    department(alex, dermatology).\n" +
-        "    appointment(lino, 202).\n" +
-        "    appointment(lino, 102).\n" +
-        "    appointment(sarah, 202).\n" +
-        "    meetAt(kim, 202).\n" +
-        "    meetAt(tim, 202).\n" +
-        "    meetAt(tim, 102).\n" +
-        "    hasADisease(tim, cardio).";
+        "    appointment(john, 101).\n" +
+        "    appointment(alex, 102).\n" +
+        "    appointment(sarah, 103).\n" +
+        "    meetAt(marco, 102).\n" +
+        "    meetAt(zavier, 105).\n" +
+        "    meetAt(george, 102).\n" +
+        "    allocatedTo(marco, lucas).\n" +
+        "    allocatedto(lucas, john).\n" +
+        "    hasADisease(marco, cold).\n" +
+        "    hasADisease(chloe, fever).\n" +
+        "    hasA(apollo, daniel).\n" +
+        "    diagnose(cold, peter).\n" +
+        "    availability(peter, hailey).\n" +
+        "    appointed(hailey, george).\n" +
+        "    appointedTo(george, john).\n" +
+        "    diagnose(fever, john).\n" +
+        "    appointedTo(X, Y):-allocatedTo(X, Z), allocatedto(Z,Y).\n" +
+        "    appointedTo(X, Y):-hasADisease(X, Z), diagnose(Z, Y).\n" +
+        "    schedule(X, Y):-availability(X, Z), appointed(Z, Y).\n" +
+        "    hasA(apollo, tommy) | hasA(apollo, alex) | hasA(apollo, john) | hasA(apollo, daniel) | hasA(apollo, sarah) | hasA(apollo, peter) | hasA(apollo, lino).\n" +
+        "    meetAt(X, Y):-appointedTo(X, Z), appointment(Z, Y).\n" +
+        "    hasADisease(X, Y):-appointedTo(X, Z), diagnose(Y, Z).";
       // sorts
       var contstring = editor.split("sorts\n")[1].split("predicates\n");
       var sortstring = contstring[0].split(".");
@@ -175,8 +205,6 @@
       all_predicates.push("speak spanish"); // extra terms
       a = FuzzySet(all_predicates);
 
-      console.log(all_predicates);
-
       // Speech recognition API
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -194,12 +222,17 @@
         const question = textInput.value;
         if (question.trim() === "") {
           answerBox.innerHTML = "Please ask a question.";
+          answerDiv.innerHTML = "Please ask a question.";
+          var msg = new SpeechSynthesisUtterance();
+          msg.text = answerDiv.textContent;
+          window.speechSynthesis.speak(msg);
           return;
         }
         var trim_script = question.split(" ");
         trim_script = trim_script.filter((f) => !stopwords.includes(f));
         var queryQues = a.get(trim_script.join(" "), null, 0.5);
         getAnswer(queryQues);
+        console.log(queryQues);
       });
 
       // Handle speech recognition
@@ -221,11 +254,25 @@
       }
       voiceBtn.addEventListener("click", startSpeechRecognition);
 
+      var showText = function (target, message, index, interval) {
+        if (index < message.length) {
+          $(target).append(message[index++]);
+          setTimeout(function () {
+            showText(target, message, index, interval);
+          }, interval);
+        }
+      };
+
+      $(function () {
+        showText("#msg", "Ask a Question based on the Knowledge", 0, 100);
+      });
+
       function getAnswer(question) {
         if (question != null) {
           var mainkey = question[0][1].replace("speak ", "");
           var answerarr = mainkey.split(" ");
           var key1 = "";
+          console.log(answerarr);
           answerarr.forEach((d) => {
             key1 = predicates[d] != undefined ? d : key1;
           });
@@ -257,6 +304,7 @@
               console.log(editor);
               console.log(response);
               const answer = response || "Sorry, I could not find an answer.";
+              console.log(response);
               answerDiv.innerHTML = answer;
               answerBox.innerHTML = answer;
               var msg = new SpeechSynthesisUtterance();
@@ -267,6 +315,13 @@
               console.log("error: " + error);
             },
           });
+        } else {
+          const answer = "Sorry, I could not find an answer.";
+          answerDiv.innerHTML = answer;
+          answerBox.innerHTML = answer;
+          var msg = new SpeechSynthesisUtterance();
+          msg.text = answerDiv.textContent;
+          window.speechSynthesis.speak(msg);
         }
       }
     </script>
